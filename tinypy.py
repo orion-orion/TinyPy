@@ -19,9 +19,39 @@ def main():
     while True:
         try:
             input_str = input('>>> ')
+            """Parse an expression from a string. If the string does not
+            contain anexpression, None is returned. If the string cannot be
+            parsed, a SyntaxError is raised.
+
+            >>> from pyparser import Parser
+            >>> from pytokenizer import Tokenizer
+            >>> tokenizer = Tokenizer()
+            >>> parser = Parser()
+            >>> parser.parse(tokenizer.tokenize('lambda x: add(x, 2)'))
+            Lambda(['x'], Application(Variable('add'),
+            [Variable('x'), Literal(2)]))
+            >>> parser.parse(tokenizer.tokenize('(lambda x: add(x, 2))(2)'))
+            Application(Lambda(['x'], Application(Variable('add'),
+            [Variable('x'), Literal(2)])), [Literal(3)])
+            >>> parser.parse(tokenizer.tokenize('(lambda: 2)()'))
+            Application(Lambda([], Literal(2)), [])
+            >>> parser.parse(tokenizer.tokenize('lambda x y: 5'))
+            SyntaxError: expected 'COLON' but got 'NAME'
+            >>> tokenizer.tokenize('  '))
+            []
+            """
             tokenizer = Tokenizer()
             tokens = tokenizer.tokenize(input_str)
-            print(tokens)
+            parser = Parser()
+            if tokens:
+                ast = parser.parse(tokens)
+            else:
+                ast = None
+            if ast is not None:
+                if print_ast:
+                    print(repr(ast))
+                else:
+                    print(ast.eval(global_env))
         except (SyntaxError, NameError, TypeError) as err:
             print(type(err).__name__ + ':', err)
         except (KeyboardInterrupt, EOFError):  # Ctrl-C, Ctrl-D
